@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>범모의 공군 D-day</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+        sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(circle at top, #1e3a8a, #020617);
+      color: #f9fafb;
+    }
+
+    .container {
+      text-align: center;
+      padding: 2.5rem 1.5rem;
+      max-width: 480px;
+      width: 100%;
+      background: rgba(15, 23, 42, 0.9);
+      border-radius: 1.5rem;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+      border: 1px solid rgba(148, 163, 184, 0.5);
+      backdrop-filter: blur(10px);
+    }
+
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 0.6rem;
+    }
+
+    .subtitle {
+      font-size: 0.95rem;
+      color: #e5e7eb;
+      margin-bottom: 1.5rem;
+    }
+
+    #countdown {
+      display: flex;
+      justify-content: center;
+      gap: 0.75rem;
+      margin-bottom: 1.2rem;
+      flex-wrap: wrap;
+    }
+
+    .time-box {
+      background: rgba(15, 23, 42, 0.9);
+      border-radius: 0.9rem;
+      padding: 0.6rem 0.8rem;
+      min-width: 70px;
+      border: 1px solid rgba(148, 163, 184, 0.5);
+    }
+
+    .time-box span:first-child {
+      display: block;
+      font-size: 1.4rem;
+      font-weight: 700;
+    }
+
+    .time-box span:last-child {
+      display: block;
+      font-size: 0.8rem;
+      color: #9ca3af;
+      margin-top: 0.1rem;
+    }
+
+    #dDayText {
+      margin-top: 0.3rem;
+      margin-bottom: 1.4rem;
+      font-size: 0.95rem;
+      color: #e5e7eb;
+    }
+
+    #playButton {
+      border: none;
+      outline: none;
+      padding: 0.75rem 1.4rem;
+      border-radius: 999px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      background: #fbbf24;
+      color: #111827;
+      transition: transform 0.1s ease, box-shadow 0.1s ease,
+        background 0.1s ease;
+      box-shadow: 0 8px 18px rgba(234, 179, 8, 0.5);
+    }
+
+    #playButton:hover {
+      background: #facc15;
+      transform: translateY(-1px);
+      box-shadow: 0 10px 22px rgba(234, 179, 8, 0.6);
+    }
+
+    #playButton:active {
+      transform: translateY(1px);
+      box-shadow: 0 4px 10px rgba(234, 179, 8, 0.4);
+    }
+
+    .hint {
+      margin-top: 0.7rem;
+      font-size: 0.75rem;
+      color: #9ca3af;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>범모의 공군 D-day</h1>
+    <p class="subtitle">대한민국 공군 입대까지 남은 시간</p>
+
+    <div id="countdown">
+      <div class="time-box">
+        <span id="days">0</span>
+        <span>일</span>
+      </div>
+      <div class="time-box">
+        <span id="hours">0</span>
+        <span>시간</span>
+      </div>
+      <div class="time-box">
+        <span id="minutes">0</span>
+        <span>분</span>
+      </div>
+      <div class="time-box">
+        <span id="seconds">0</span>
+        <span>초</span>
+      </div>
+    </div>
+
+    <p id="dDayText"></p>
+
+    <button id="playButton">🔔 기상 나팔 울리기</button>
+    <p class="hint">
+      ※ 크롬/모바일 브라우저 정책 때문에, 보통은 <b>버튼을 한번 눌러야</b> 소리가
+      재생돼요.
+    </p>
+  </div>
+
+  <!-- 기상나팔 오디오 -->
+  <audio id="bugle" src="111.mp3" preload="auto"></audio>
+
+  <script>
+    // ★★★ 여기 날짜만 실제 입대 날짜로 바꾸면 됨! ★★★
+    // 예: 2026년 1월 10일 14시(오후 2시) 입대, 한국 시간 기준
+    const targetDate = new Date("2026-01-10T14:00:00+09:00");
+    // ↑ 친구 입대 날짜/시간에 맞게 바꿔줘
+
+    const daysSpan = document.getElementById("days");
+    const hoursSpan = document.getElementById("hours");
+    const minutesSpan = document.getElementById("minutes");
+    const secondsSpan = document.getElementById("seconds");
+    const dDayText = document.getElementById("dDayText");
+
+    function updateCountdown() {
+      const now = new Date();
+      const diff = targetDate - now;
+
+      if (diff <= 0) {
+        daysSpan.textContent = 0;
+        hoursSpan.textContent = 0;
+        minutesSpan.textContent = 0;
+        secondsSpan.textContent = 0;
+        dDayText.textContent = "오늘은 범모의 공군 입대일입니다! 🇰🇷✈";
+        return;
+      }
+
+      const totalSeconds = Math.floor(diff / 1000);
+      const days = Math.floor(totalSeconds / (60 * 60 * 24));
+      const hours = Math.floor((totalSeconds % (60 * 60 * 24)) / (60 * 60));
+      const minutes = Math.floor((totalSeconds % (60 * 60)) / 60);
+      const seconds = totalSeconds % 60;
+
+      daysSpan.textContent = days;
+      hoursSpan.textContent = hours;
+      minutesSpan.textContent = minutes;
+      secondsSpan.textContent = seconds;
+
+      dDayText.textContent = `D-${days}`;
+    }
+
+    updateCountdown();
+    setInterval(updateCountdown, 1000);
+
+    // ----- 기상나팔 재생 -----
+    const bugle = document.getElementById("bugle");
+    const playButton = document.getElementById("playButton");
+
+    // 1) 버튼 누르면 재생
+    playButton.addEventListener("click", () => {
+      bugle.currentTime = 0;
+      bugle
+        .play()
+        .catch((err) => console.log("오디오 재생이 차단됨:", err));
+    });
+
+    // 2) 사이트 들어오자마자 자동 재생 '시도'
+    // (브라우저가 막을 수도 있음)
+    window.addEventListener("load", () => {
+      bugle.play().catch(() => {
+        // 자동 재생이 막힌 경우: 콘솔에만 찍고, 버튼으로 들을 수 있음
+        console.log("자동 재생이 차단되어, 버튼으로 재생해야 합니다.");
+      });
+    });
+  </script>
+</body>
+</html>
