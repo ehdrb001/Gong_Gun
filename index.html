@@ -68,6 +68,11 @@
       font-weight: 600;
     }
 
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
     .result {
       font-size: 24px;
       font-weight: 700;
@@ -87,7 +92,7 @@
 
 <body>
 
-  <!-- 자동 재생 (모바일 제한으로 첫 터치 후 활성화됨) -->
+  <!-- 군대 나팔 소리 (111.mp3가 같은 폴더에 있어야 함) -->
   <audio id="sound" autoplay>
     <source src="111.mp3" type="audio/mpeg">
   </audio>
@@ -100,51 +105,93 @@
     <label for="targetDate">입대 날짜 선택</label>
     <input type="date" id="targetDate">
 
-    <button onclick="calc()">D-DAY 계산하기</button>
+    <button id="calcBtn" type="button">D-DAY 계산하기</button>
 
     <div id="result" class="result">아직 계산 안 했습니다.</div>
     <div id="detail" class="sub"></div>
   </div>
 
 <script>
-  // 모바일 자동재생 우회 - 첫 번 터치 후 재생
-  document.body.addEventListener("click", () => {
-    const audio = document.getElementById("sound");
-    audio.volume = 1.0;
-    audio.play().catch(()=>{});
-  }, { once:true });
-
-  // 날짜 표시
-  function format(date){
-    let y=date.getFullYear();
-    let m=String(date.getMonth()+1).padStart(2,"0");
-    let d=String(date.getDate()).padStart(2,"0");
+  // ---------- 공통 유틸 ----------
+  function formatDate(date){
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, "0");
+    const d = String(date.getDate()).padStart(2, "0");
     return `${y}-${m}-${d}`;
   }
 
-  function update(){
-    document.getElementById("todayText").innerText = 
-    "오늘 날짜 : " + format(new Date());
+  function dateFromInput(value){
+    // "2025-11-27" → Date 객체
+    const parts = value.split("-");
+    if (parts.length !== 3) return null;
+    const year  = Number(parts[0]);
+    const month = Number(parts[1]);
+    const day   = Number(parts[2]);
+    if (!year || !month || !day) return null;
+    const d = new Date(year, month - 1, day);
+    d.setHours(0,0,0,0);
+    return d;
   }
-  update();
 
-  // D-day 계산
+  // ---------- 초기 세팅 ----------
+  function init(){
+    const audio    = document.getElementById("sound");
+    const todayBox = document.getElementById("todayText");
+    const btn      = document.getElementById("calcBtn");
+
+    // 오늘 날짜 텍스트 세팅
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    todayBox.innerText = "오늘 날짜 : " + formatDate(today);
+
+    // 모바일 자동재생 우회 - 첫 터치 시 오디오 재생 시도
+    document.body.addEventListener("click", () => {
+      audio.volume = 1.0;
+      audio.play().catch(()=>{});
+    }, { once:true });
+
+    // 버튼 클릭 이벤트 연결
+    btn.addEventListener("click", calc);
+  }
+
+  // ---------- D-DAY 계산 ----------
   function calc(){
-    let input=document.getElementById("targetDate").value;
-    if(!input) return alert("입대 날짜를 선택하세요!");
+    const targetValue = document.getElementById("targetDate").value;
+    const resultBox   = document.getElementById("result");
+    const detailBox   = document.getElementById("detail");
 
-    let today=new Date(); today.setHours(0,0,0,0);
-    let target=new Date(input); target.setHours(0,0,0,0);
+    if (!targetValue){
+      alert("입대 날짜를 먼저 선택하세요!");
+      return;
+    }
 
-    let diff=Math.floor((target.getTime()-today.getTime())/(1000*60*60*24));
+    const today = new Date();
+    today.setHours(0,0,0,0);
 
-    if(diff>0){
-      document.getElementById("result").innerText=`D-${diff}`;
-      document.getElementById("detail").innerText=`입대까지 ${diff}일 남았습니다.`;
-    }else if(diff===0){
-      document.getElementById("result").innerText=`🔥 D-DAY 🔥`;
-      document.getElementById("detail").innerText=`오늘이 입대하는 날입니다. 힘내라 범모 💪`;
-    }else{
-      diff=Math.abs(diff);
-      document.getElementById("result").innerText=`D+${diff}`;
-      document.getElementById("detail").innerText=`입대한 지 ${dif
+    const target = dateFromInput(targetValue);
+    if (!target){
+      alert("날짜 형식이 이상해요. 다시 선택해 주세요!");
+      return;
+    }
+
+    const diffMs   = target.getTime() - today.getTime();
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+    if (diffDays > 0){
+      resultBox.innerText = `D-${diffDays}`;
+      detailBox.innerText = `입대까지 ${diffDays}일 남았습니다.`;
+    } else if (diffDays === 0){
+      resultBox.innerText = `🔥 D-DAY 🔥`;
+      detailBox.innerText = `오늘이 입대하는 날입니다. 힘내라 범모 💪`;
+    } else {
+      const passed = Math.abs(diffDays);
+      resultBox.innerText = `D+${passed}`;
+      detailBox.innerText = `입대한 지 ${passed}일 지났습니다.`;
+    }
+  }
+
+  // 페이지 로드되면 init 실행
+  window.addEventListener("DOMContentLoaded", init);
+</script>
+</body>
+</html>
