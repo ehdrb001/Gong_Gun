@@ -18,3 +18,76 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      background: radial-gradient(circle at top, #1e3a8a, #020617);
+      color: #f9fafb;
+    }
+
+    .container {
+      text-align: center;
+      padding: 2.4rem 1.5rem 2.6rem;
+      max-width: 520px;
+      width: 100%;
+      background: rgba(15, 23, 42, 0.95);
+      border-radius: 1.5rem;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+      border: 2px solid rgba(248, 250, 252, 0.2);
+      backdrop-filter: blur(10px);
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 0.6rem;
+    }
+
+    .subtitle {
+      font-size: 0.95rem;
+      color: #e5e7eb;
+      margin-bottom: 1.5rem;
+    }
+
+    #countdown {
+      display: flex;
+      justify-content: center;
+      gap: 0.75rem;
+      margin-bottom: 1.2rem;
+      flex-wrap: wrap;
+    }
+
+    .time-box {
+      background: rgba(15, 23, 42, 0.9);
+      border-radius: 0.9rem;
+      padding: 0.6rem 0.8rem;
+      min-width: 70px;
+      border: 1px solid rgba(148, 163, 184, 0.5);
+    }
+
+    .time-box span:first-child {
+      display: block;
+      font-size: 1.4rem;
+      font-weight: 700;
+    }
+
+    .time-box span:last-child {
+      display: block;
+      font-size: 0.8rem;
+      color: #9ca3af;
+      margin-top: 0.1rem;
+    }
+
+    #dDayText {
+      margin-top: 0.3rem;
+      margin-bottom: 1.4rem;
+      font-size: 0.95rem;
+      color: #e5e7eb;
+    }
+
+    #playButton {
+      border: none;
+      outline: none;
+      padding: 0.75rem 1.4rem;
+      border-radius: 999px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
