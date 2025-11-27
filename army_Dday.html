@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>군대 D-DAY 계산기</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #f4f6fb;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .container {
+      background: #ffffff;
+      padding: 24px 28px;
+      border-radius: 16px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+      max-width: 420px;
+      width: 100%;
+      box-sizing: border-box;
+      text-align: center;
+    }
+
+    h1 {
+      margin-top: 0;
+      margin-bottom: 4px;
+      font-size: 24px;
+    }
+
+    .subtitle {
+      color: #666;
+      margin-bottom: 20px;
+      font-size: 13px;
+    }
+
+    .field {
+      margin-bottom: 16px;
+      text-align: left;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    input[type="date"],
+    input[type="text"] {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 8px 10px;
+      border-radius: 8px;
+      border: 1px solid #ccd1e4;
+      font-size: 14px;
+    }
+
+    button {
+      margin-top: 8px;
+      width: 100%;
+      padding: 10px 0;
+      border-radius: 10px;
+      border: none;
+      background: #2f66ff;
+      color: white;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #214ee0;
+    }
+
+    .today {
+      font-size: 13px;
+      color: #777;
+      margin-top: 10px;
+      margin-bottom: 20px;
+    }
+
+    .result {
+      margin-top: 18px;
+      padding: 14px 12px;
+      border-radius: 12px;
+      background: #f0f3ff;
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .result-sub {
+      margin-top: 6px;
+      font-size: 13px;
+      color: #555;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>군대 D-DAY</h1>
+    <div class="subtitle">입대 날짜를 선택하면 D-DAY를 계산해줘요</div>
+
+    <div class="today" id="todayText"></div>
+
+    <div class="field">
+      <label for="eventName">이름 / 메모 (선택)</label>
+      <input type="text" id="eventName" placeholder="예) 현역 입대, 공군 입대 등" />
+    </div>
+
+    <div class="field">
+      <label for="targetDate">입대 날짜</label>
+      <input type="date" id="targetDate" />
+    </div>
+
+    <button id="calcBtn">D-DAY 계산하기</button>
+
+    <div class="result" id="resultBox">아직 D-DAY를 계산하지 않았어요.</div>
+    <div class="result-sub" id="resultDetail"></div>
+  </div>
+
+  <script>
+    // 오늘 날짜를 "YYYY-MM-DD" 형식으로 표시
+    function formatDate(date) {
+      const y = date.getFullYear();
+      const m = String(date.getMonth() + 1).padStart(2, "0");
+      const d = String(date.getDate()).padStart(2, "0");
+      return `${y}-${m}-${d}`;
+    }
+
+    function updateToday() {
+      const today = new Date();
+      document.getElementById("todayText").innerText =
+        "오늘 날짜 : " + formatDate(today);
+    }
+
+    // D-day 계산 함수
+    function calcDday() {
+      const eventNameInput = document.getElementById("eventName");
+      const targetDateInput = document.getElementById("targetDate");
+      const resultBox = document.getElementById("resultBox");
+      const resultDetail = document.getElementById("resultDetail");
+
+      const eventName = eventNameInput.value.trim();
+      const targetValue = targetDateInput.value;
+
+      if (!targetValue) {
+        alert("입대 날짜를 먼저 선택해 주세요!");
+        return;
+      }
+
+      // 오늘 00:00, 목표일 00:00 기준으로 계산 (시간 영향 제거)
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      const target = new Date(targetValue);
+      target.setHours(0, 0, 0, 0);
+
+      const diffMs = target.getTime() - today.getTime(); // 밀리초 차이
+      const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+      let mainText = "";
+      let detailText = "";
+
+      const title = eventName ? eventName : "입대";
+
+      if (diffDays > 0) {
+        mainText = `${title}까지 D-${diffDays}`;
+        detailText = `오늘 기준으로 ${diffDays}일 남았습니다.`;
+      } else if (diffDays === 0) {
+        mainText = `${title} D-DAY`;
+        detailText = "오늘이 입대일입니다. 파이팅 💪";
+      } else {
+        const passed = Math.abs(diffDays);
+        mainText = `${title} D+${passed}`;
+        detailText = `입대한 지 ${passed}일이 지났습니다.`;
+      }
+
+      resultBox.innerText = mainText;
+      resultDetail.innerText = detailText;
+    }
+
+    // 최초 로딩 시 오늘 날짜 세팅
+    updateToday();
+
+    // 버튼 클릭 시 D-day 계산
+    document.getElementById("calcBtn").addEventListener("click", calcDday);
+  </script>
+</body>
+</html>
